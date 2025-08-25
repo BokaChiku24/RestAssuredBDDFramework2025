@@ -9,6 +9,7 @@ import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+import resources.APIResources;
 import resources.TestDataBuild;
 import resources.Utils;
 
@@ -20,20 +21,21 @@ import static org.junit.Assert.assertEquals;
 public class StepDefinition extends Utils {
     Response addPlaceBaseResponse;
     RequestSpecification res;
-    ResponseSpecification resspec;
+    ResponseSpecification resSpec;
     TestDataBuild data = new TestDataBuild();
-    @Given("add place payload")
-    public void add_place_payload() throws IOException {
-        resspec = new ResponseSpecBuilder().expectStatusCode(200)
+    @Given("add place payload {string}{string}{string}")
+    public void add_place_payload(String name, String language, String address) throws IOException {
+        resSpec = new ResponseSpecBuilder().expectStatusCode(200)
                 .expectContentType(ContentType.JSON).build();
-        res = given().spec(requestSpecification()).body(data.addPlacePayLoad());
+        res = given().spec(requestSpecification()).body(data.addPlacePayLoad(name, language, address));
     }
 
     @When("user calls {string} with POST http request")
-    public void user_calls_with_post_http_request(String string) {
+    public void user_calls_with_post_http_request(String addPlace) {
         // Write code here that turns the phrase above into concrete actions
+        APIResources resourceAPI = APIResources.valueOf(addPlace);
         addPlaceBaseResponse = res.when()
-                .post("/maps/api/place/add/json").then().spec(resspec).extract().response();
+                .post(resourceAPI.getResource()).then().spec(resSpec).extract().response();
     }
 
     @Then("the API call is success with status code {int}")
